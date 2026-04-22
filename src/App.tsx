@@ -17,14 +17,20 @@ import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
+import Lookbook from './pages/Lookbook';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { AuthProvider } from './context/AuthContext';
 import CartDrawer from './components/CartDrawer';
+import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminDiscounts from './pages/admin/AdminDiscounts';
+import AdminCustomers from './pages/admin/AdminCustomers';
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -54,16 +60,24 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ToastProvider>
-      <WishlistProvider>
-        <CartProvider>
-          <BrowserRouter>
+      <AuthProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <BrowserRouter>
             <ScrollToTop />
             <Routes>
               {/* Admin Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin" element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }>
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="orders" element={<AdminOrders />} />
+                <Route path="customers" element={<AdminCustomers />} />
+                <Route path="discounts" element={<AdminDiscounts />} />
+                <Route path="settings" element={<AdminSettings />} />
               </Route>
 
               {/* Public Routes */}
@@ -78,6 +92,7 @@ export default function App() {
                     <Route path="/order-confirmation" element={<OrderConfirmation />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/faq" element={<FAQ />} />
+                    <Route path="/lookbook" element={<Lookbook />} />
                     <Route path="/product/:id" element={<ProductDetails />} />
                   </Routes>
                 </PublicLayout>
@@ -86,6 +101,7 @@ export default function App() {
           </BrowserRouter>
         </CartProvider>
       </WishlistProvider>
+      </AuthProvider>
     </ToastProvider>
   );
 }

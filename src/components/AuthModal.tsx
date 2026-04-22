@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -13,17 +15,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { addToast } = useToast();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email && password) {
-      // Mock login/registration success
-      addToast(isLogin ? 'Successfully logged in!' : 'Account created successfully!', 'success');
+      const success = await login(email, password);
       
-      // Clear form and close
-      setEmail('');
-      setPassword('');
-      onClose();
+      if (success) {
+        addToast(isLogin ? 'Successfully logged in!' : 'Account created successfully!', 'success');
+        
+        // Clear form and close
+        setEmail('');
+        setPassword('');
+        onClose();
+
+        // Redirect admin directly to dashboard
+        if (email === 'admin@raav.com') {
+          navigate('/admin');
+        }
+      }
     }
   };
 
