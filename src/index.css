@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=Prata&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Prata", ui-serif, Georgia, serif;
+}
+
+::selection {
+  background-color: #000;
+  color: #fff;
+}
