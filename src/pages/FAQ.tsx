@@ -81,7 +81,7 @@ export default function FAQ() {
                     <div key={index} className="border border-gray-200 overflow-hidden">
                       <button 
                         onClick={() => toggleFAQ(id)}
-                        className="w-full bg-[#F9F9F8] flex items-center justify-between p-5 text-left hover:bg-gray-100 transition-colors"
+                        className="w-full bg-gray-50 flex items-center justify-between p-5 text-left hover:bg-gray-100 transition-colors"
                       >
                         <span className="font-medium text-gray-900">{faq.q}</span>
                         {isOpen ? <Minus className="w-5 h-5 text-gray-500 flex-shrink-0 ml-4" /> : <Plus className="w-5 h-5 text-gray-500 flex-shrink-0 ml-4" />}

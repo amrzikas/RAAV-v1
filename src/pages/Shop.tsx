@@ -110,7 +110,7 @@ export default function Shop() {
   return (
     <div className="pt-24 pb-20 bg-white">
       {/* Shop Header */}
-      <div className="bg-[#F9F9F8] py-16 mb-12">
+      <div className="bg-gray-50 py-16 mb-12">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 tracking-tight text-gray-900">The Collection</h1>
           <p className="text-gray-500 max-w-xl mx-auto font-light">Explore our entire catalogue of meticulously crafted pieces. Filter by standard categories or refine your search for the perfect addition to your wardrobe.</p>

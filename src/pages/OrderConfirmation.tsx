@@ -30,7 +30,7 @@ export default function OrderConfirmation() {
           Thank you for your purchase! We've received your order and are getting it ready to ship.
         </p>
 
-        <div className="bg-[#F9F9F8] p-8 border border-gray-100 mb-10 text-left">
+        <div className="bg-gray-50 p-8 border border-gray-100 mb-10 text-left">
           <div className="flex items-start gap-4 border-b border-gray-200 pb-6 mb-6">
             <Package className="w-6 h-6 text-gray-400 mt-1" />
             <div>

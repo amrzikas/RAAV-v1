@@ -4,7 +4,7 @@ export default function AboutUs() {
   return (
     <div className="pt-24 pb-20 bg-white min-h-screen">
       {/* Header Area */}
-      <div className="bg-[#F9F9F8] py-20 mb-16">
+      <div className="bg-gray-50 py-20 mb-16">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}

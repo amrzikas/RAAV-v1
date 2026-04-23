@@ -89,7 +89,7 @@ export default function Contact() {
           </div>
 
           {/* Contact Form */}
-          <div className="w-full lg:w-2/3 bg-[#F9F9F8] p-8 md:p-12">
+          <div className="w-full lg:w-2/3 bg-gray-50 p-8 md:p-12">
             <h3 className="text-2xl font-serif font-bold mb-8">Send a Message</h3>
             
             <form onSubmit={handleSubmit} className="space-y-6">

@@ -62,7 +62,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-[#F9F9F8]">
+      <main className="flex-1 overflow-y-auto bg-gray-50">
         <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
           <h1 className="text-lg font-serif font-medium text-gray-900 flex items-center capitalize">
             {location.pathname === '/admin' ? 'Dashboard' : location.pathname.split('/').pop()}

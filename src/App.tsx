@@ -22,6 +22,7 @@ import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import CartDrawer from './components/CartDrawer';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -59,13 +60,14 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
               {/* Admin Routes */}
               <Route path="/admin" element={
                 <ProtectedRoute requireAdmin={true}>
@@ -103,5 +105,6 @@ export default function App() {
       </WishlistProvider>
       </AuthProvider>
     </ToastProvider>
+    </ThemeProvider>
   );
 }

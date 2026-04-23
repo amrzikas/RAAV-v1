@@ -65,7 +65,7 @@ export default function Banners() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="bg-[#F9F9F8] p-10 flex flex-col justify-center border border-gray-100"
+              className="bg-gray-50 p-10 flex flex-col justify-center border border-gray-100"
             >
               <h4 className="font-serif text-2xl font-bold mb-3 text-gray-900">Accessories Sale</h4>
               <p className="text-gray-500 mb-6 font-light leading-relaxed">

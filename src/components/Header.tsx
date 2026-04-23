@@ -1,4 +1,4 @@
-import { Search, User, ShoppingBag, Menu, X, Heart } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, Heart, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { products } from '../data/products';
 import AuthModal from './AuthModal';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,6 +17,7 @@ export default function Header() {
   const location = useLocation();
   const { cartCount, setIsCartOpen } = useCart();
   const { wishlistCount } = useWishlist();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,6 +56,10 @@ export default function Header() {
             <div className="flex items-center space-x-4 md:space-x-6">
               <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="hover:text-gray-500 transition-colors">
                 {isSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+              </button>
+              
+              <button onClick={toggleTheme} className="hover:text-gray-500 transition-colors">
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
               
               <Link to="/wishlist" className="hover:text-gray-500 transition-colors relative hidden sm:block">

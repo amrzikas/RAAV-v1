@@ -37,7 +37,7 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="pt-32 pb-20 min-h-screen bg-[#F9F9F8] flex flex-col items-center justify-center text-center">
+      <div className="pt-32 pb-20 min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center">
         <h1 className="text-3xl font-serif font-bold mb-4">Your bag is empty</h1>
         <p className="text-gray-500 mb-8 max-w-md mx-auto">There's nothing to checkout yet. Explore our latest collections.</p>
         <Link to="/shop" className="bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
@@ -146,7 +146,7 @@ export default function Checkout() {
 
           {/* Order Summary */}
           <div className="w-full lg:w-2/5">
-            <div className="bg-[#F9F9F8] p-6 lg:p-8 sticky top-28">
+            <div className="bg-gray-50 p-6 lg:p-8 sticky top-28">
               <h2 className="text-xl font-serif font-bold mb-6">Order Summary</h2>
               
               <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">

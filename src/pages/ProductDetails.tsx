@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Heart, ShoppingBag, ChevronRight, Star, Truck, RefreshCw, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { products } from '../data/products';
 
 // Centralized mock data for the product details to simulate a database query
 const productDatabase = {
@@ -280,7 +281,7 @@ export default function ProductDetails() {
             { name: "Elena R.", date: "Sep 28, 2026", text: "I've received so many compliments wearing this. It's versatile enough for the office and elegant enough for evening wear. Sizing was perfect.", stars: 5 },
             { name: "Jessica T.", date: "Sep 15, 2026", text: "Beautiful design and great structure. Would highly recommend this brand to anyone looking for refined staples.", stars: 4 }
           ].map((review, i) => (
-            <div key={i} className="bg-[#F9F9F8] p-6 border border-gray-100">
+            <div key={i} className="bg-gray-50 p-6 border border-gray-100">
               <div className="flex gap-1 mb-3">
                 {[...Array(5)].map((_, idx) => (
                   <span key={idx} className={`text-sm ${idx < review.stars ? 'text-black' : 'text-gray-300'}`}>★</span>

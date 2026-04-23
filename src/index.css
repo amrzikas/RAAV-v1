@@ -6,7 +6,33 @@
   --font-serif: "Prata", ui-serif, Georgia, serif;
 }
 
+/* Dark Mode Theme Overrides */
+.dark {
+  --color-white: #0a0a0a;
+  --color-black: #ffffff;
+
+  --color-gray-50: #171717;
+  --color-gray-100: #262626;
+  --color-gray-200: #404040;
+  --color-gray-300: #525252;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #d4d4d4;
+  --color-gray-600: #e5e5e5;
+  --color-gray-700: #f5f5f5;
+  --color-gray-800: #fafafa;
+  --color-gray-900: #ffffff;
+  --color-gray-950: #ffffff;
+
+  color-scheme: dark;
+}
+
+/* Force specific colors in dark mode to map nicely */
+.dark body {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
 ::selection {
-  background-color: #000;
-  color: #fff;
+  background-color: var(--color-black);
+  color: var(--color-white);
 }

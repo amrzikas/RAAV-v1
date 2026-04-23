@@ -3,7 +3,7 @@ import { Quote as QuoteIcon } from 'lucide-react';
 
 export default function Quote() {
   return (
-    <section className="py-24 md:py-32 bg-[#F9F9F8]">
+    <section className="py-24 md:py-32 bg-gray-50">
       <div className="container mx-auto px-4 text-center max-w-4xl relative">
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
