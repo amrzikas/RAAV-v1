@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Edit, Trash2, Upload, X } from 'lucide-react';
 import { products } from '../../data/products';
 
 export default function AdminProducts() {
@@ -17,6 +17,18 @@ export default function AdminProducts() {
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState('');
 
+  // New form states for additional fields
+  const [productDetails, setProductDetails] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  
+  // Colors (simple hex text array for mock)
+  const [newColor, setNewColor] = useState('#000000');
+  const [colors, setColors] = useState<string[]>([]);
+  
+  // Sizes (simple text string array for mock)
+  const [newSize, setNewSize] = useState('');
+  const [sizes, setSizes] = useState<string[]>([]);
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -30,6 +42,43 @@ export default function AdminProducts() {
     }
     setIsAddingNewCategory(false);
     setNewCustomCategory('');
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && images.length < 5) {
+      // In a real app we'd upload the file to a server here.
+      // For mock, create a local object URL to display preview
+      const newImages = Array.from(e.target.files).slice(0, 5 - images.length).map(f => URL.createObjectURL(f));
+      setImages([...images, ...newImages]);
+    }
+    // reset input
+    if (e.target) e.target.value = '';
+  };
+  
+  const removeImage = (indexToRemove: number) => {
+    setImages(images.filter((_, index) => index !== indexToRemove));
+  };
+  
+  const handleAddColor = () => {
+    if (newColor.trim() && !colors.includes(newColor.trim())) {
+      setColors([...colors, newColor.trim()]);
+    }
+    setNewColor('#000000');
+  };
+  
+  const removeColor = (colorToRemove: string) => {
+    setColors(colors.filter(c => c !== colorToRemove));
+  };
+  
+  const handleAddSize = () => {
+    if (newSize.trim() && !sizes.includes(newSize.trim().toUpperCase())) {
+      setSizes([...sizes, newSize.trim().toUpperCase()]);
+    }
+    setNewSize('');
+  };
+  
+  const removeSize = (sizeToRemove: string) => {
+    setSizes(sizes.filter(s => s !== sizeToRemove));
   };
 
   return (
@@ -133,6 +182,114 @@ export default function AdminProducts() {
                 <option value="in_stock">In Stock</option>
                 <option value="out_of_stock">Out of Stock</option>
               </select>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Product Description</label>
+            <textarea 
+              rows={4}
+              placeholder="Detailed description of the product..." 
+              value={productDetails}
+              onChange={(e) => setProductDetails(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none" 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Available Colors (Hex)</label>
+              <div className="flex gap-2 mb-2">
+                <div className="relative">
+                  <input 
+                    type="color" 
+                    value={newColor}
+                    onChange={(e) => setNewColor(e.target.value)}
+                    className="w-10 h-10 p-0 border border-gray-200 rounded-md cursor-pointer absolute inset-0 opacity-0"
+                  />
+                  <div 
+                    className="w-10 h-10 border border-gray-200 rounded-md shadow-sm"
+                    style={{ backgroundColor: newColor }}
+                  />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="e.g. #000000" 
+                  value={newColor}
+                  onChange={(e) => setNewColor(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddColor(); } }}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
+                />
+                <button type="button" onClick={handleAddColor} className="bg-gray-100 text-black px-3 py-2 rounded-md hover:bg-gray-200"><Plus className="w-4 h-4" /></button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {colors.map((color, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-full pl-1 pr-2 py-1">
+                    <span className="w-4 h-4 rounded-full border border-gray-300" style={{ backgroundColor: color }}></span>
+                    <span className="text-xs uppercase ml-1">{color}</span>
+                    <button type="button" onClick={() => removeColor(color)} className="text-gray-400 hover:text-red-500 ml-1"><X className="w-3 h-3" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Available Sizes</label>
+              <div className="flex gap-2 mb-2">
+                <input 
+                  type="text" 
+                  placeholder="e.g. S, M, L, XL" 
+                  value={newSize}
+                  onChange={(e) => setNewSize(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSize(); } }}
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm uppercase" 
+                />
+                <button type="button" onClick={handleAddSize} className="bg-gray-100 text-black px-3 py-2 rounded-md hover:bg-gray-200"><Plus className="w-4 h-4" /></button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {sizes.map((size, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-md px-2 py-1">
+                    <span className="text-xs font-bold uppercase">{size}</span>
+                    <button type="button" onClick={() => removeSize(size)} className="text-gray-400 hover:text-red-500 ml-1"><X className="w-3 h-3" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider">Product Images (Up to 5)</label>
+              <span className="text-xs text-gray-500">{images.length}/5 uploaded</span>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              {images.map((img, index) => (
+                <div key={index} className="aspect-square bg-gray-100 rounded-md relative group border border-gray-200 overflow-hidden">
+                  <img src={img} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                  <button 
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              
+              {images.length < 5 && (
+                <label className="aspect-square bg-gray-50 rounded-md border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-colors">
+                  <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                  <span className="text-xs text-gray-500 font-medium text-center px-2">Upload Image</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    multiple 
+                    className="hidden" 
+                    onChange={handleImageUpload}
+                  />
+                </label>
+              )}
             </div>
           </div>
 

@@ -11,7 +11,7 @@ export default function AdminOrders() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md">All Orders</button>
           <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors">Pending</button>
           <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors">Completed</button>

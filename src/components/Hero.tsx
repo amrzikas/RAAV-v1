@@ -21,22 +21,22 @@ export default function Hero() {
               </span>
             </div>
             
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-serif font-bold mb-6 leading-[1.05] tracking-tight text-gray-900">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold mb-6 leading-[1.05] tracking-tight text-gray-900">
               Refining <br /> 
               <span className="italic font-light text-gray-500">Everyday</span> <br /> 
               Elegance.
             </h1>
             
-            <p className="text-gray-600 text-lg md:text-xl mb-10 max-w-md leading-relaxed font-light">
+            <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-10 max-w-md leading-relaxed font-light">
               Discover the modern aesthetic with our newly curated collection. Designed for the bold, the beautiful, and the minimalist.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/shop" className="group flex items-center justify-center gap-3 bg-black text-white px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-gray-800 transition-all">
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
+              <Link to="/shop" className="group w-full sm:w-auto flex items-center justify-center gap-3 bg-black text-white px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-gray-800 transition-all">
                 Shop Collection
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link to="/lookbook" className="flex items-center justify-center bg-transparent border border-black text-black px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
+              <Link to="/lookbook" className="w-full sm:w-auto flex items-center justify-center bg-transparent border border-black text-black px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
                 Explore Lookbook
               </Link>
             </div>
