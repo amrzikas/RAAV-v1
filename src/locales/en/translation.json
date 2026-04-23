@@ -1,0 +1,37 @@
+{
+  "header": {
+    "home": "HOME",
+    "shop": "SHOP",
+    "about": "ABOUT US",
+    "wishlist": "WISHLIST",
+    "account": "ACCOUNT",
+    "search": "Search products by name or category...",
+    "results": "Results",
+    "no_matches": "No products found matching"
+  },
+  "hero": {
+    "season": "Spring / Summer 2026",
+    "title_part1": "Refining",
+    "title_part2": "Everyday",
+    "title_part3": "Elegance.",
+    "subtitle": "Discover the modern aesthetic with our newly curated collection. Designed for the bold, the beautiful, and the minimalist.",
+    "shop_btn": "Shop Collection",
+    "lookbook_btn": "Explore Lookbook",
+    "editors_pick": "Editor's Pick",
+    "editor_quote": "The perfect balance of form and function for the modern wardrobe."
+  },
+  "footer": {
+    "desc": "Sophisticated aesthetics for the modern individual. Elevate your wardrobe with our meticulously curated collections.",
+    "quick_links": "Quick Links",
+    "help_info": "Help & Info",
+    "track_order": "Track Your Order",
+    "returns": "Returns Policies",
+    "shipping": "Shipping + Delivery",
+    "contact": "Contact Us",
+    "faqs": "FAQs",
+    "queries": "Do you have any queries or suggestions?",
+    "support": "If you need support? Just give us a call.",
+    "rights": "RAAV Store. All rights reserved.",
+    "admin": "Admin Panel"
+  }
+}

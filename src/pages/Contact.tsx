@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { useContent } from '../context/ContentContext';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 export default function Contact() {
   const { addToast } = useToast();
+  const { content } = useContent();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,8 +32,8 @@ export default function Contact() {
         
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 tracking-tight text-gray-900">Contact Us</h1>
-          <p className="text-gray-500 max-w-2xl mx-auto font-light">
-            We'd love to hear from you. Whether you have a question about our collections, sizing, pricing, or anything else, our team is ready to answer all your questions.
+          <p className="text-gray-500 max-w-2xl mx-auto font-light whitespace-pre-wrap">
+            {content.contactUs}
           </p>
         </div>
 

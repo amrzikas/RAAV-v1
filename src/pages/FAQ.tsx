@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Minus, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useContent } from '../context/ContentContext';
 
 const faqs = [
   {
@@ -51,6 +52,7 @@ const faqs = [
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<string | null>("0-0");
+  const { content } = useContent();
 
   const toggleFAQ = (id: string) => {
     setOpenIndex(openIndex === id ? null : id);
@@ -69,7 +71,7 @@ export default function FAQ() {
         </div>
 
         <div className="space-y-12">
-          {faqs.map((group, groupIndex) => (
+          {content.faqs.map((group, groupIndex) => (
             <div key={groupIndex}>
               <h2 className="text-2xl font-serif font-bold mb-6 text-gray-900 border-b border-gray-100 pb-2">{group.category}</h2>
               <div className="space-y-4">

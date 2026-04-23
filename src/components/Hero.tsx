@@ -1,8 +1,17 @@
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useContent } from '../context/ContentContext';
 
 export default function Hero() {
+  const { t, i18n } = useTranslation();
+  const { content } = useContent();
+
+  // If language is english, we prioritize the dynamic content from admin panel over the static JSON. 
+  // In a real app we'd save translations properly, but for this demo, dynamic content is mainly in English
+  const isEn = i18n.language === 'en';
+
   return (
     <section className="relative min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden bg-gray-50">
       <div className="container mx-auto px-4 md:px-6">
@@ -17,27 +26,27 @@ export default function Hero() {
             <div className="inline-flex items-center gap-4 mb-8">
               <span className="h-[1px] w-12 bg-black"></span>
               <span className="text-xs font-bold tracking-[0.2em] text-gray-900 uppercase">
-                Spring / Summer 2026
+                {isEn ? content.homeHero.season : t('hero.season')}
               </span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold mb-6 leading-[1.05] tracking-tight text-gray-900">
-              Refining <br /> 
-              <span className="italic font-light text-gray-500">Everyday</span> <br /> 
-              Elegance.
+              {isEn ? content.homeHero.titlePart1 : t('hero.title_part1')} <br /> 
+              <span className="italic font-light text-gray-500">{isEn ? content.homeHero.titlePart2 : t('hero.title_part2')}</span> <br /> 
+              {isEn ? content.homeHero.titlePart3 : t('hero.title_part3')}
             </h1>
             
-            <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-10 max-w-md leading-relaxed font-light">
-              Discover the modern aesthetic with our newly curated collection. Designed for the bold, the beautiful, and the minimalist.
+            <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-10 max-w-md leading-relaxed font-light whitespace-pre-wrap">
+              {isEn ? content.homeHero.subtitle : t('hero.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full">
               <Link to="/shop" className="group w-full sm:w-auto flex items-center justify-center gap-3 bg-black text-white px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-gray-800 transition-all">
-                Shop Collection
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                {t('hero.shop_btn')}
+                <ArrowRight className="w-4 h-4 group-hover:rtl:-translate-x-1 group-hover:ltr:translate-x-1 transition-transform rtl:rotate-180" />
               </Link>
               <Link to="/lookbook" className="w-full sm:w-auto flex items-center justify-center bg-transparent border border-black text-black px-8 py-4 text-sm font-medium uppercase tracking-widest hover:bg-black hover:text-white transition-colors">
-                Explore Lookbook
+                {t('hero.lookbook_btn')}
               </Link>
             </div>
           </motion.div>
@@ -50,7 +59,7 @@ export default function Hero() {
           >
             <div className="absolute inset-0 bg-gray-200 overflow-hidden shadow-2xl">
               <img 
-                src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&auto=format&fit=crop&q=80" 
+                src={content.homeHero.image} 
                 alt="Contemporary Fashion" 
                 className="w-full h-full object-cover object-center"
               />
@@ -61,11 +70,11 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="absolute -bottom-6 -left-6 md:-left-12 bg-white p-6 shadow-xl max-w-[240px] hidden md:block"
+              className="absolute -bottom-6 -left-6 md:-left-12 rtl:-right-6 md:rtl:-right-12 rtl:left-auto bg-white p-6 shadow-xl max-w-[240px] hidden md:block"
             >
-              <p className="text-xs font-bold tracking-widest uppercase mb-3 text-black">Editor's Pick</p>
+              <p className="text-xs font-bold tracking-widest uppercase mb-3 text-black">{t('hero.editors_pick')}</p>
               <p className="text-sm text-gray-600 font-serif italic leading-relaxed">
-                "The perfect balance of form and function for the modern wardrobe."
+                "{isEn ? content.homeHero.editorQuote : t('hero.editor_quote')}"
               </p>
             </motion.div>
           </motion.div>
