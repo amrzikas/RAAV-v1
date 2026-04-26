@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useContent } from '../context/ContentContext';
+import { useAuth } from '../context/AuthContext';
 
 const defaultProductPlaceholder = {
   id: 0,
@@ -23,6 +24,7 @@ export default function ProductDetails() {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language;
   const { content, updateContent } = useContent();
+  const { user } = useAuth();
   const products = content.products || [];
 
   const product = useMemo(() => {
@@ -293,54 +295,63 @@ export default function ProductDetails() {
         {/* Add Review Form */}
         <div className="mt-16 max-w-2xl mx-auto bg-gray-50 p-6 border border-gray-100">
           <h3 className="text-lg font-serif font-bold mb-4 text-center">Write a Review</h3>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const form = e.target as HTMLFormElement;
-            const name = (form.elements.namedItem('reviewerName') as HTMLInputElement).value;
-            const text = (form.elements.namedItem('reviewText') as HTMLTextAreaElement).value;
-            const rating = parseInt((form.elements.namedItem('reviewRating') as HTMLSelectElement).value);
+          {user ? (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const name = (form.elements.namedItem('reviewerName') as HTMLInputElement).value;
+              const text = (form.elements.namedItem('reviewText') as HTMLTextAreaElement).value;
+              const rating = parseInt((form.elements.namedItem('reviewRating') as HTMLSelectElement).value);
 
-            if (!name || !text) return;
+              if (!name || !text) return;
 
-            const newReview = {
-              id: Date.now().toString(),
-              user: name,
-              rating,
-              text,
-              date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-            };
+              const newReview = {
+                id: Date.now().toString(),
+                user: name,
+                rating,
+                text,
+                date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+              };
 
-            const updatedProducts = content.products.map(p => 
-              p.id === product.id ? { ...p, reviews: [...(p.reviews || []), newReview] } : p
-            );
+              const updatedProducts = content.products.map(p => 
+                p.id === product.id ? { ...p, reviews: [...(p.reviews || []), newReview] } : p
+              );
 
-            updateContent({ ...content, products: updatedProducts });
-            form.reset();
-          }} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Name</label>
-                <input required name="reviewerName" type="text" className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white" />
+              updateContent({ ...content, products: updatedProducts });
+              form.reset();
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Name</label>
+                  <input required name="reviewerName" type="text" defaultValue={user.email.split('@')[0]} className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Rating</label>
+                  <select name="reviewRating" className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white">
+                    <option value="5">★★★★★ (5/5)</option>
+                    <option value="4">★★★★☆ (4/5)</option>
+                    <option value="3">★★★☆☆ (3/5)</option>
+                    <option value="2">★★☆☆☆ (2/5)</option>
+                    <option value="1">★☆☆☆☆ (1/5)</option>
+                  </select>
+                </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Rating</label>
-                <select name="reviewRating" className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white">
-                  <option value="5">★★★★★ (5/5)</option>
-                  <option value="4">★★★★☆ (4/5)</option>
-                  <option value="3">★★★☆☆ (3/5)</option>
-                  <option value="2">★★☆☆☆ (2/5)</option>
-                  <option value="1">★☆☆☆☆ (1/5)</option>
-                </select>
+                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Review</label>
+                <textarea required name="reviewText" rows={4} className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white resize-none"></textarea>
               </div>
+              <button type="submit" className="w-full bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
+                Submit Review
+              </button>
+            </form>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-4 text-sm font-light">You must be logged in to leave a review.</p>
+              <Link to="/auth" className="inline-block bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
+                Log In
+              </Link>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Review</label>
-              <textarea required name="reviewText" rows={4} className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white resize-none"></textarea>
-            </div>
-            <button type="submit" className="w-full bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
-              Submit Review
-            </button>
-          </form>
+          )}
         </div>
       </div>
 
