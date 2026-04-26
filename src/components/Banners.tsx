@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
 
 export default function Banners() {
-  const { content } = useContent();
-  const { main, sub, text } = content.homeBanners;
+  const { currentLocale } = useContent();
+  const { main, sub, text } = currentLocale.homeBanners;
 
   return (
     <section className="py-20 bg-white">

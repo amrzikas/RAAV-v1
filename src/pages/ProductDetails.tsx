@@ -1,45 +1,48 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, ShoppingBag, ChevronRight, Star, Truck, RefreshCw, Plus, Minus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { products } from '../data/products';
+import { useContent } from '../context/ContentContext';
 
-// Centralized mock data for the product details to simulate a database query
-const productDatabase = {
-  1: { name: 'Silk Slip Dress', price: 189.00, category: 'Dresses', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&auto=format&fit=crop&q=80' },
-  2: { name: 'Oversized Wool Blazer', price: 245.00, category: 'Outerwear', image: 'https://images.unsplash.com/photo-1604473855581-2c9ff50fe2ba?w=1200&auto=format&fit=crop&q=80' },
-  3: { name: 'Linen Button-Up', price: 95.00, category: 'Tops', image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=1200&auto=format&fit=crop&q=80' },
-  4: { name: 'Leather Crossbody Kit', price: 320.00, category: 'Accessories', image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1200&auto=format&fit=crop&q=80' },
-  5: { name: 'Minimalist Loafers', price: 155.00, category: 'Shoes', image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1200&auto=format&fit=crop&q=80' },
-  6: { name: 'High-Rise Trousers', price: 140.00, category: 'Pants', image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=1200&auto=format&fit=crop&q=80' },
-  7: { name: 'Knit Sweater', price: 120.00, category: 'Men', image: 'https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=1200&auto=format&fit=crop&q=80' },
-  8: { name: 'Casual T-Shirt', price: 45.00, category: 'Men', image: 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=1200&auto=format&fit=crop&q=80' },
-};
-
-const defaultProduct = {
+const defaultProductPlaceholder = {
+  id: 0,
   name: 'Refined Editor Collection Piece',
   price: 295.00,
   category: 'Exclusive',
-  image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&auto=format&fit=crop&q=80'
+  image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&auto=format&fit=crop&q=80',
+  colors: ['#000000', '#F5F5DC', '#556B2F'],
+  sizes: ['XS', 'S', 'M', 'L', 'XL'],
+  description: 'Meticulously crafted with unparalleled attention to detail. This piece represents the perfect equilibrium between modern aesthetics and timeless wearability. Elevate your wardrobe instantly.'
 };
-
-const galleryImages = [
-  "?auto=format&fit=crop&w=1200&q=80",
-  "?auto=format&fit=crop&w=1200&q=80&sat=-100", // simulated variation
-  "?auto=format&fit=crop&w=1200&q=80&con=2", // simulated variation
-];
-
-const sizes = ['XS', 'S', 'M', 'L', 'XL'];
-const colors = ['#000000', '#F5F5DC', '#556B2F'];
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const productInfo = productDatabase[id as keyof typeof productDatabase] || defaultProduct;
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+  const { content, updateContent } = useContent();
+  const products = content.products || [];
+
+  const product = useMemo(() => {
+    const found = products.find(p => p.id === Number(id));
+    return found || defaultProductPlaceholder;
+  }, [id, products]);
+
+  const productName = product.translations?.[currentLang]?.name || product.name;
+  const productDescription = product.translations?.[currentLang]?.description || product.description || defaultProductPlaceholder.description;
+  const productComposition = product.translations?.[currentLang]?.composition || product.composition || "We source only the finest sustainable materials to ensure longevity and minimal environmental impact.";
+  const productCare = product.translations?.[currentLang]?.care || product.care || "To maintain the exceptional quality of this piece, please observe the following care instructions.";
+
+  const galleryImages = [
+    "?auto=format&fit=crop&w=1200&q=80",
+    "?auto=format&fit=crop&w=1200&q=80&sat=-100", 
+    "?auto=format&fit=crop&w=1200&q=80&con=2",
+  ];
   
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || 'M');
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '#000000');
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState('details');
@@ -49,21 +52,27 @@ export default function ProductDetails() {
 
   const handleAddToCart = () => {
     addToCart({
-      productId: id || 'default',
-      name: productInfo.name,
-      price: productInfo.price,
-      image: productInfo.image,
+      productId: product.id,
+      name: productName,
+      price: product.price,
+      image: product.image,
       size: selectedSize,
       color: selectedColor,
       quantity: quantity
     });
   };
 
-  const currentProductId = id || 'default';
-  const isWished = isInWishlist(currentProductId);
+  const isWished = isInWishlist(product.id);
 
   // Parse out the base URL of the image to apply simulated gallery queries
-  const baseImageUrl = productInfo.image.split('?')[0];
+  const baseImageUrl = product.image.split('?')[0];
+
+  const shippingPlan = useMemo(() => {
+    if (product.shippingPlanId) {
+      return content.shippingPlans?.find(p => p.id === product.shippingPlanId);
+    }
+    return null;
+  }, [product.shippingPlanId, content.shippingPlans]);
 
   return (
     <div className="pt-28 pb-20 bg-white min-h-screen">
@@ -71,11 +80,11 @@ export default function ProductDetails() {
         
         {/* Breadcrumbs */}
         <nav className="flex items-center text-sm text-gray-500 mb-10 font-light">
-          <Link to="/" className="hover:text-black transition-colors">Home</Link>
+          <Link to="/" className="hover:text-black transition-colors">{t('home', 'Home')}</Link>
           <ChevronRight className="w-4 h-4 mx-2" />
-          <Link to="/shop" className="hover:text-black transition-colors">Shop</Link>
+          <Link to="/shop" className="hover:text-black transition-colors">{t('shop', 'Shop')}</Link>
           <ChevronRight className="w-4 h-4 mx-2" />
-          <span className="text-gray-900 font-medium">{productInfo.category}</span>
+          <span className="text-gray-900 font-medium">{product.category}</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
@@ -103,7 +112,7 @@ export default function ProductDetails() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                   src={`${baseImageUrl}${galleryImages[activeImage]}`} 
-                  alt={productInfo.name} 
+                  alt={productName} 
                   className="w-full h-full object-cover object-center"
                 />
               </AnimatePresence>
@@ -113,22 +122,20 @@ export default function ProductDetails() {
           {/* Product Info */}
           <div className="lg:col-span-5 flex flex-col pt-2 lg:pt-8">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium tracking-[0.2em] uppercase text-gray-500">{productInfo.category}</span>
+              <span className="text-sm font-medium tracking-[0.2em] uppercase text-gray-500">{product.category}</span>
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-black text-black" />
-                <Star className="w-4 h-4 fill-black text-black" />
-                <Star className="w-4 h-4 fill-black text-black" />
-                <Star className="w-4 h-4 fill-black text-black" />
-                <Star className="w-4 h-4 fill-black text-black" />
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-black text-black" />
+                ))}
                 <span className="text-xs text-gray-500 ml-1 font-medium">(128)</span>
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">{productInfo.name}</h1>
-            <p className="text-2xl font-serif text-gray-900 mb-8 border-b border-gray-100 pb-8">${productInfo.price.toFixed(2)}</p>
+            <h1 className={`text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4 ${currentLang === 'ar' ? 'font-arabic' : ''}`}>{productName}</h1>
+            <p className="text-2xl font-serif text-gray-900 mb-8 border-b border-gray-100 pb-8">${product.price.toFixed(2)}</p>
 
-            <p className="text-gray-600 font-light leading-relaxed mb-8">
-              Meticulously crafted with unparalleled attention to detail. This piece represents the perfect equilibrium between modern aesthetics and timeless wearability. Elevate your wardrobe instantly.
+            <p className={`text-gray-600 font-light leading-relaxed mb-8 ${currentLang === 'ar' ? 'font-arabic' : ''}`}>
+              {productDescription}
             </p>
 
             {/* Selectors */}
@@ -136,10 +143,10 @@ export default function ProductDetails() {
               
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-medium uppercase tracking-widest text-gray-900">Color</span>
+                  <span className="text-sm font-medium uppercase tracking-widest text-gray-900">{t('color', 'Color')}</span>
                 </div>
                 <div className="flex gap-3">
-                  {colors.map(color => (
+                  {(product.colors || defaultProductPlaceholder.colors).map(color => (
                     <button 
                       key={color}
                       onClick={() => setSelectedColor(color)}
@@ -153,11 +160,11 @@ export default function ProductDetails() {
 
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-medium uppercase tracking-widest text-gray-900">Size</span>
-                  <a href="#" className="text-xs text-gray-500 font-light hover:text-black underline transition-colors">Size Guide</a>
+                  <span className="text-sm font-medium uppercase tracking-widest text-gray-900">{t('size', 'Size')}</span>
+                  <a href="#" className="text-xs text-gray-500 font-light hover:text-black underline transition-colors">{t('size_guide', 'Size Guide')}</a>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {sizes.map(size => (
+                  {(product.sizes || defaultProductPlaceholder.sizes).map(size => (
                     <button 
                       key={size}
                       onClick={() => setSelectedSize(size)}
@@ -186,10 +193,10 @@ export default function ProductDetails() {
                 onClick={handleAddToCart}
                 className="flex-grow bg-black text-white h-14 flex items-center justify-center gap-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
                >
-                <ShoppingBag className="w-4 h-4" /> Add to Bag
+                <ShoppingBag className="w-4 h-4" /> {t('add_to_bag', 'Add to Bag')}
               </button>
               <button 
-                onClick={() => toggleWishlist({ productId: currentProductId, name: productInfo.name, price: productInfo.price, image: productInfo.image, category: productInfo.category })}
+                onClick={() => toggleWishlist({ productId: product.id, name: productName, price: product.price, image: product.image, category: product.category })}
                 className={`border border-gray-200 h-14 w-14 flex items-center justify-center transition-colors flex-shrink-0 ${isWished ? 'text-red-500 hover:border-red-200' : 'text-gray-600 hover:border-black hover:text-black'}`}
               >
                 <Heart className="w-5 h-5" fill={isWished ? "currentColor" : "none"} />
@@ -201,14 +208,16 @@ export default function ProductDetails() {
               <div className="flex items-start gap-4">
                 <Truck className="w-5 h-5 text-black flex-shrink-0" strokeWidth={1.5} />
                 <div>
-                  <p className="text-sm border-b border-black inline-block font-medium mb-1 cursor-pointer">Free Standard Shipping</p>
-                  <p className="text-xs text-gray-500 font-light">Estimated delivery within 3-5 business days</p>
+                  <p className="text-sm border-b border-black inline-block font-medium mb-1 cursor-pointer">
+                    {shippingPlan ? `${shippingPlan.name} ($${shippingPlan.rate.toFixed(2)})` : t('free_shipping', 'Free Standard Shipping')}
+                  </p>
+                  <p className="text-xs text-gray-500 font-light">{t('delivery_estimate', 'Estimated delivery within 3-5 business days')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <RefreshCw className="w-5 h-5 text-black flex-shrink-0" strokeWidth={1.5} />
                 <div>
-                  <p className="text-sm font-medium mb-1">Easy 30-Day Returns</p>
+                  <p className="text-sm font-medium mb-1">{t('easy_returns', 'Easy 30-Day Returns')}</p>
                 </div>
               </div>
             </div>
@@ -224,7 +233,7 @@ export default function ProductDetails() {
                       activeTab === tab ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-900'
                     }`}
                   >
-                    {tab}
+                    {t(`tab_${tab}`, tab)}
                   </button>
                 ))}
               </div>
@@ -233,33 +242,17 @@ export default function ProductDetails() {
                 <AnimatePresence mode="wait">
                   {activeTab === 'details' && (
                     <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <p className="mb-3">A signature piece in our latest collection. Designed with a draped, relaxed silhouette that flatters the wearer while providing unparalleled comfort. Includes side slip pockets and a concealed closure.</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Relaxed, contemporary fit</li>
-                        <li>Concealed fastening</li>
-                        <li>Ethically produced</li>
-                      </ul>
+                      <p className="mb-3 whitespace-pre-line">{productDescription}</p>
                     </motion.div>
                   )}
                   {activeTab === 'composition' && (
                     <motion.div key="comp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <p className="mb-3">We source only the finest sustainable materials to ensure longevity and minimal environmental impact.</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Main: 100% Organic Material</li>
-                        <li>Lining: 100% Recycled Cupro</li>
-                        <li>Designed in Milan, Handcrafted in Portugal</li>
-                      </ul>
+                      <p className="mb-3 whitespace-pre-line">{productComposition}</p>
                     </motion.div>
                   )}
                   {activeTab === 'care' && (
                     <motion.div key="care" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <p className="mb-3">To maintain the exceptional quality of this piece, please observe the following care instructions:</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Dry clean only</li>
-                        <li>Do not bleach</li>
-                        <li>Cool iron on reverse</li>
-                        <li>Store correctly on a premium hanger</li>
-                      </ul>
+                      <p className="mb-3 whitespace-pre-line">{productCare}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -273,51 +266,108 @@ export default function ProductDetails() {
 
       {/* Customer Reviews Section */}
       <div className="container mx-auto px-4 md:px-6 max-w-6xl mt-24">
-        <h2 className="text-2xl font-serif font-bold mb-10 text-center border-b border-gray-100 pb-4">Customer Reviews</h2>
+        <h2 className="text-2xl font-serif font-bold mb-10 text-center border-b border-gray-100 pb-4">{t('customer_reviews', 'Customer Reviews')}</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { name: "Sarah M.", date: "Oct 12, 2026", text: "Absolutely stunning piece. The quality of the fabric is exceptional and the fit is remarkably flattering. Worth every penny.", stars: 5 },
-            { name: "Elena R.", date: "Sep 28, 2026", text: "I've received so many compliments wearing this. It's versatile enough for the office and elegant enough for evening wear. Sizing was perfect.", stars: 5 },
-            { name: "Jessica T.", date: "Sep 15, 2026", text: "Beautiful design and great structure. Would highly recommend this brand to anyone looking for refined staples.", stars: 4 }
-          ].map((review, i) => (
+          {(product.reviews || []).map((review, i) => (
             <div key={i} className="bg-gray-50 p-6 border border-gray-100">
               <div className="flex gap-1 mb-3">
                 {[...Array(5)].map((_, idx) => (
-                  <span key={idx} className={`text-sm ${idx < review.stars ? 'text-black' : 'text-gray-300'}`}>★</span>
+                  <span key={idx} className={`text-xl ${idx < review.rating ? 'text-black' : 'text-gray-300'}`}>★</span>
                 ))}
               </div>
               <p className="text-gray-600 font-light text-sm italic mb-4 leading-relaxed">"{review.text}"</p>
               <div className="flex justify-between items-center mt-auto text-xs uppercase tracking-widest text-gray-400 font-bold">
-                <span>{review.name}</span>
+                <span>{review.user}</span>
                 <span>{review.date}</span>
               </div>
             </div>
           ))}
+          {(!product.reviews || product.reviews.length === 0) && (
+            <div className="col-span-3 text-center text-gray-500 font-light py-8">
+              No reviews yet. Be the first to review this product!
+            </div>
+          )}
+        </div>
+
+        {/* Add Review Form */}
+        <div className="mt-16 max-w-2xl mx-auto bg-gray-50 p-6 border border-gray-100">
+          <h3 className="text-lg font-serif font-bold mb-4 text-center">Write a Review</h3>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const form = e.target as HTMLFormElement;
+            const name = (form.elements.namedItem('reviewerName') as HTMLInputElement).value;
+            const text = (form.elements.namedItem('reviewText') as HTMLTextAreaElement).value;
+            const rating = parseInt((form.elements.namedItem('reviewRating') as HTMLSelectElement).value);
+
+            if (!name || !text) return;
+
+            const newReview = {
+              id: Date.now().toString(),
+              user: name,
+              rating,
+              text,
+              date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            };
+
+            const updatedProducts = content.products.map(p => 
+              p.id === product.id ? { ...p, reviews: [...(p.reviews || []), newReview] } : p
+            );
+
+            updateContent({ ...content, products: updatedProducts });
+            form.reset();
+          }} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Name</label>
+                <input required name="reviewerName" type="text" className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Rating</label>
+                <select name="reviewRating" className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white">
+                  <option value="5">★★★★★ (5/5)</option>
+                  <option value="4">★★★★☆ (4/5)</option>
+                  <option value="3">★★★☆☆ (3/5)</option>
+                  <option value="2">★★☆☆☆ (2/5)</option>
+                  <option value="1">★☆☆☆☆ (1/5)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Your Review</label>
+              <textarea required name="reviewText" rows={4} className="w-full px-4 py-2 border border-gray-200 outline-none focus:border-black text-sm bg-white resize-none"></textarea>
+            </div>
+            <button type="submit" className="w-full bg-black text-white px-8 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
+              Submit Review
+            </button>
+          </form>
         </div>
       </div>
 
       {/* You Might Also Like */}
-      {products.filter(p => p.category === productInfo.category && p.id !== currentProductId).length > 0 && (
+      {products.filter(p => p.category === product.category && p.id !== product.id).length > 0 && (
         <div className="container mx-auto px-4 md:px-6 max-w-6xl mt-32 border-t border-gray-100 pt-20">
-          <h2 className="text-2xl font-serif font-bold mb-10 text-center">You Might Also Like</h2>
+          <h2 className="text-2xl font-serif font-bold mb-10 text-center">{t('you_might_also_like', 'You Might Also Like')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {products
-              .filter(p => p.category === productInfo.category && p.id !== currentProductId)
+              .filter(p => p.category === product.category && p.id !== product.id)
               .slice(0, 4)
-              .map(relatedProduct => (
-                <Link key={relatedProduct.id} to={`/product/${relatedProduct.id}`} className="group">
-                  <div className="aspect-[3/4] bg-gray-100 overflow-hidden mb-4 relative">
-                    <img 
-                      src={relatedProduct.image} 
-                      alt={relatedProduct.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                    />
-                  </div>
-                  <h3 className="text-sm font-medium mb-1 group-hover:text-gray-500 transition-colors line-clamp-1">{relatedProduct.name}</h3>
-                  <p className="text-gray-500 text-sm">${relatedProduct.price.toFixed(2)}</p>
-                </Link>
-              ))}
+              .map(relatedProduct => {
+                 const relName = relatedProduct.translations?.[currentLang]?.name || relatedProduct.name;
+                 return (
+                  <Link key={relatedProduct.id} to={`/product/${relatedProduct.id}`} className="group">
+                    <div className="aspect-[3/4] bg-gray-100 overflow-hidden mb-4 relative">
+                      <img 
+                        src={relatedProduct.image} 
+                        alt={relName} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      />
+                    </div>
+                    <h3 className={`text-sm font-medium mb-1 group-hover:text-gray-500 transition-colors line-clamp-1 ${currentLang === 'ar' ? 'font-arabic' : ''}`}>{relName}</h3>
+                    <p className="text-gray-500 text-sm">${relatedProduct.price.toFixed(2)}</p>
+                  </Link>
+                );
+              })}
           </div>
         </div>
       )}

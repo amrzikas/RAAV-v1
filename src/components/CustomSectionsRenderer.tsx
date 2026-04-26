@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
 
 export default function CustomSectionsRenderer() {
-  const { content } = useContent();
+  const { currentLocale } = useContent();
 
-  if (!content.customSections || content.customSections.length === 0) {
+  if (!currentLocale.customSections || currentLocale.customSections.length === 0) {
     return null;
   }
 
   return (
     <>
-      {content.customSections.map((section, index) => {
+      {currentLocale.customSections.map((section, index) => {
         if (section.type === 'banner') {
           return (
             <section key={section.id} className="py-20 bg-white">

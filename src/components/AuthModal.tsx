@@ -1,9 +1,11 @@
+import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, Mail, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,6 +13,8 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +28,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const success = await login(email, password);
       
       if (success) {
-        addToast(isLogin ? 'Successfully logged in!' : 'Account created successfully!', 'success');
+        addToast(isLogin ? t('auth.login_success', 'Successfully logged in!') : t('auth.register_success', 'Account created successfully!'), 'success');
         
         // Clear form and close
         setEmail('');
@@ -57,7 +61,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white z-[90] shadow-2xl overflow-hidden"
+            className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white z-[90] shadow-2xl overflow-hidden ${currentLang === 'ar' ? 'font-arabic' : ''}`}
           >
             {/* Header / Tabs */}
             <div className="flex border-b border-gray-100">
@@ -65,70 +69,73 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${isLogin ? 'bg-white text-black' : 'bg-gray-50 text-gray-400 hover:text-black'}`}
               >
-                Sign In
+                {t('auth.sign_in', 'Sign In')}
               </button>
               <button 
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${!isLogin ? 'bg-white text-black' : 'bg-gray-50 text-gray-400 hover:text-black'}`}
               >
-                Register
+                {t('auth.register', 'Register')}
               </button>
-              <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors">
+              <button onClick={onClose} className={`absolute top-4 ${currentLang === 'ar' ? 'left-4' : 'right-4'} text-gray-400 hover:text-black transition-colors`}>
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Form Content */}
-            <div className="p-8">
+            <div className={`p-8 ${currentLang === 'ar' ? 'text-right' : 'text-left'}`}>
               <h2 className="text-2xl font-serif font-bold mb-2">
-                {isLogin ? 'Welcome Back' : 'Create an Account'}
+                {isLogin ? (currentLang === 'ar' ? 'مرحباً بعودتك' : 'Welcome Back') : (currentLang === 'ar' ? 'إنشاء حساب جديد' : 'Create an Account')}
               </h2>
               <p className="text-sm font-light text-gray-500 mb-8">
-                {isLogin ? 'Sign in to access your orders and wishlist.' : 'Join us to track orders and save your favorites.'}
+                {isLogin 
+                  ? (currentLang === 'ar' ? 'سجل دخولك للوصول إلى طلباتك وقائمة مفضلاتك.' : 'Sign in to access your orders and wishlist.') 
+                  : (currentLang === 'ar' ? 'انضم إلينا لتتبع طلباتك وحفظ مفضلاتك.' : 'Join us to track orders and save your favorites.')}
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Full Name</label>
+                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">{t('contact_form.name', 'Full Name')}</label>
                     <input type="text" required className="w-full border border-gray-300 px-4 py-3 outline-none focus:border-black transition-colors" />
                   </div>
                 )}
                 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
+                  <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">{t('auth.email', 'Email Address')}</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Mail className={`absolute ${currentLang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400`} />
                     <input 
                       type="email" 
                       required 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full border border-gray-300 pl-10 pr-4 py-3 outline-none focus:border-black transition-colors" 
+                      className={`w-full border border-gray-300 ${currentLang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 outline-none focus:border-black transition-colors`}
                     />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider">Password</label>
-                    {isLogin && <a href="#" className="text-xs text-gray-500 hover:text-black underline transition-colors">Forgot password?</a>}
+                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider">{t('auth.password', 'Password')}</label>
+                    {isLogin && <a href="#" className="text-xs text-gray-500 hover:text-black underline transition-colors">{t('auth.forgot_password', 'Forgot password?')}</a>}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className={`absolute ${currentLang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400`} />
                     <input 
                       type="password" 
                       required 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full border border-gray-300 pl-10 pr-4 py-3 outline-none focus:border-black transition-colors" 
+                      className={`w-full border border-gray-300 ${currentLang === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 outline-none focus:border-black transition-colors`}
                     />
                   </div>
                 </div>
 
                 <div className="pt-4">
                   <button type="submit" className="w-full bg-black text-white h-12 flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
-                    {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight className="w-4 h-4" />
+                    {isLogin ? t('auth.sign_in_btn', 'Sign In') : t('auth.create_account_btn', 'Create Account')} 
+                    <ArrowRight className={`w-4 h-4 ${currentLang === 'ar' ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
               </form>

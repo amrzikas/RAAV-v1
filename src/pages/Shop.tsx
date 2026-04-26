@@ -29,6 +29,7 @@ export default function Shop() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortOption, setSortOption] = useState('Featured');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Advanced Filter States
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
@@ -54,6 +55,12 @@ export default function Shop() {
   // Apply Filters & Sorting
   const filteredProducts = useMemo(() => {
     let result = products;
+
+    // Search Query
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    }
 
     // Category
     if (activeCategory !== 'All') {
@@ -155,6 +162,19 @@ export default function Shop() {
           <div className={`w-full lg:w-1/4 flex-shrink-0 lg:block ${showMobileFilters ? 'block' : 'hidden'}`}>
             <div className="sticky top-32 pr-6">
               
+              <div className="mb-10">
+                <h3 className="text-lg font-serif font-bold mb-3 text-gray-900">Search Products</h3>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by name..."
+                    className="w-full border border-gray-200 px-4 py-2 outline-none focus:border-black transition-colors"
+                  />
+                </div>
+              </div>
+
               <div className="mb-10">
                 <h3 className="text-lg font-serif font-bold mb-5 text-gray-900">Categories</h3>
                 <ul className="space-y-3">

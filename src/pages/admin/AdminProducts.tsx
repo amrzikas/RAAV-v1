@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Upload, X } from 'lucide-react';
-import { products } from '../../data/products';
+import React, { useState } from 'react';
+import { Plus, Search, Edit, Trash2, Upload, X } from 'lucide-react';
+import { useContent } from '../../context/ContentContext';
+import { Product } from '../../types';
 
 export default function AdminProducts() {
+  const { content, updateContent } = useContent();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   
-  // Existing categories derived from mock data 
+  // Existing categories derived from dynamic data 
+  const products = content.products || [];
   const initialCategories = Array.from(new Set(products.map(p => p.category)));
   const [categories, setCategories] = useState<string[]>(initialCategories);
 
@@ -16,10 +20,19 @@ export default function AdminProducts() {
   const [newProductCategory, setNewProductCategory] = useState(categories[0] || '');
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState('');
+  const [productTranslations, setProductTranslations] = useState<{ [locale: string]: { name: string, description: string, composition?: string, care?: string } }>({
+    ar: { name: '', description: '', composition: '', care: '' }
+  });
+  const [editingFormLang, setEditingFormLang] = useState<'en' | 'ar'>('en');
 
   // New form states for additional fields
   const [productDetails, setProductDetails] = useState('');
+  const [productComposition, setProductComposition] = useState('');
+  const [productCare, setProductCare] = useState('');
+  const [activeDetailsTab, setActiveDetailsTab] = useState<'description' | 'composition' | 'care'>('description');
+
   const [images, setImages] = useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState('');
   
   // Colors (simple hex text array for mock)
   const [newColor, setNewColor] = useState('#000000');
@@ -28,6 +41,7 @@ export default function AdminProducts() {
   // Sizes (simple text string array for mock)
   const [newSize, setNewSize] = useState('');
   const [sizes, setSizes] = useState<string[]>([]);
+  const [newShippingPlanId, setNewShippingPlanId] = useState<string>('');
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,11 +58,89 @@ export default function AdminProducts() {
     setNewCustomCategory('');
   };
 
+  const resetForm = () => {
+    setNewProductName('');
+    setNewProductPrice('');
+    setNewProductCategory(categories[0] || '');
+    setProductDetails('');
+    setProductComposition('');
+    setProductCare('');
+    setActiveDetailsTab('description');
+    setImages([]);
+    setColors([]);
+    setSizes([]);
+    setNewShippingPlanId('');
+    setProductTranslations({ ar: { name: '', description: '', composition: '', care: '' } });
+    setEditingFormLang('en');
+    setEditingId(null);
+    setIsAdding(false);
+  };
+
+  const handleSaveProduct = () => {
+    if (!newProductName || !newProductPrice) return;
+
+    const productData: Product = {
+      id: editingId || Date.now(),
+      name: newProductName,
+      price: parseFloat(newProductPrice),
+      category: newProductCategory,
+      image: images[0] || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80',
+      colors: colors.length > 0 ? colors : ['Black'],
+      sizes: sizes.length > 0 ? sizes : ['S', 'M', 'L'],
+      shippingPlanId: newShippingPlanId || undefined,
+      description: productDetails,
+      composition: productComposition,
+      care: productCare,
+      translations: productTranslations
+    };
+
+    let newProducts: Product[];
+    if (editingId) {
+      newProducts = products.map(p => p.id === editingId ? productData : p);
+    } else {
+      newProducts = [...products, productData];
+    }
+
+    updateContent({
+      ...content,
+      products: newProducts
+    });
+
+    resetForm();
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingId(product.id);
+    setNewProductName(product.name);
+    setNewProductPrice(product.price.toString());
+    setNewProductCategory(product.category);
+    setProductDetails(product.description || '');
+    setProductComposition(product.composition || '');
+    setProductCare(product.care || '');
+    setImages([product.image]); // Simplified for demo
+    setColors(product.colors);
+    setSizes(product.sizes);
+    setNewShippingPlanId(product.shippingPlanId || '');
+    setProductTranslations(product.translations || { ar: { name: '', description: '', composition: '', care: '' } });
+    setIsAdding(true);
+    setActiveDetailsTab('description');
+  };
+
+  const handleDelete = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      updateContent({
+        ...content,
+        products: products.filter(p => p.id !== id)
+      });
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0 && images.length < 5) {
       // In a real app we'd upload the file to a server here.
       // For mock, create a local object URL to display preview
-      const newImages = Array.from(e.target.files).slice(0, 5 - images.length).map(f => URL.createObjectURL(f));
+      const files = Array.from(e.target.files);
+      const newImages = files.slice(0, 5 - images.length).map((f: File) => URL.createObjectURL(f));
       setImages([...images, ...newImages]);
     }
     // reset input
@@ -57,6 +149,13 @@ export default function AdminProducts() {
   
   const removeImage = (indexToRemove: number) => {
     setImages(images.filter((_, index) => index !== indexToRemove));
+  };
+  
+  const handleAddImageUrl = () => {
+    if (newImageUrl.trim() && images.length < 5) {
+      setImages([...images, newImageUrl.trim()]);
+    }
+    setNewImageUrl('');
   };
   
   const handleAddColor = () => {
@@ -106,18 +205,51 @@ export default function AdminProducts() {
       {/* Add Form */}
       {isAdding && (
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm mb-6">
-          <h2 className="text-lg font-serif font-bold text-gray-900 mb-6">Create New Product</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Product Name</label>
-              <input 
-                type="text" 
-                placeholder="Product Name" 
-                value={newProductName}
-                onChange={(e) => setNewProductName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
-              />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <h2 className="text-lg font-serif font-bold text-gray-900">{editingId ? 'Edit Product' : 'Create New Product'}</h2>
+            
+            {/* Language Switcher for Product Content */}
+            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-md">
+              <button 
+                onClick={() => setEditingFormLang('en')}
+                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${editingFormLang === 'en' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+              >
+                English
+              </button>
+              <button 
+                onClick={() => setEditingFormLang('ar')}
+                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${editingFormLang === 'ar' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+              >
+                العربية
+              </button>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {editingFormLang === 'en' ? (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Product Name (EN)</label>
+                <input 
+                  type="text" 
+                  placeholder="Product Name" 
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2 text-right">اسم المنتج (العربية)</label>
+                <input 
+                  type="text" 
+                  dir="rtl"
+                  placeholder="اسم المنتج" 
+                  value={productTranslations.ar.name}
+                  onChange={(e) => setProductTranslations({ ...productTranslations, ar: { ...productTranslations.ar, name: e.target.value } })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm text-right font-arabic" 
+                />
+              </div>
+            )}
             <div>
               <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Price ($)</label>
               <input 
@@ -176,8 +308,24 @@ export default function AdminProducts() {
                  </div>
                )}
             </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Stock Details</label>
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Shipping Plan</label>
+              <select 
+                value={newShippingPlanId}
+                onChange={(e) => setNewShippingPlanId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm bg-white"
+              >
+                <option value="">Default/No Shipping Plan</option>
+                {content.shippingPlans?.map(plan => (
+                  <option key={plan.id} value={plan.id}>{plan.name} (${plan.rate.toFixed(2)})</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Stock Status</label>
               <select className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm bg-white">
                 <option value="in_stock">In Stock</option>
                 <option value="out_of_stock">Out of Stock</option>
@@ -186,14 +334,94 @@ export default function AdminProducts() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Product Description</label>
-            <textarea 
-              rows={4}
-              placeholder="Detailed description of the product..." 
-              value={productDetails}
-              onChange={(e) => setProductDetails(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none" 
-            />
+            <div className="flex border-b border-gray-200 mb-4">
+              <button 
+                type="button"
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeDetailsTab === 'description' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveDetailsTab('description')}
+              >
+                Description
+              </button>
+              <button 
+                type="button"
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeDetailsTab === 'composition' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveDetailsTab('composition')}
+              >
+                Composition
+              </button>
+              <button 
+                type="button"
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeDetailsTab === 'care' ? 'border-black text-black' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                onClick={() => setActiveDetailsTab('care')}
+              >
+                Care
+              </button>
+            </div>
+
+            {editingFormLang === 'en' ? (
+              <>
+                {activeDetailsTab === 'description' && (
+                  <textarea 
+                    rows={4}
+                    placeholder="Detailed description of the product in English..." 
+                    value={productDetails}
+                    onChange={(e) => setProductDetails(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none" 
+                  />
+                )}
+                {activeDetailsTab === 'composition' && (
+                  <textarea 
+                    rows={4}
+                    placeholder="Product composition in English..." 
+                    value={productComposition}
+                    onChange={(e) => setProductComposition(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none" 
+                  />
+                )}
+                {activeDetailsTab === 'care' && (
+                  <textarea 
+                    rows={4}
+                    placeholder="Care instructions in English..." 
+                    value={productCare}
+                    onChange={(e) => setProductCare(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none" 
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {activeDetailsTab === 'description' && (
+                  <textarea 
+                    rows={4}
+                    dir="rtl"
+                    placeholder="وصف تفصيلي للمنتج باللغة العربية..." 
+                    value={productTranslations.ar.description}
+                    onChange={(e) => setProductTranslations({ ...productTranslations, ar: { ...productTranslations.ar, description: e.target.value } })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm text-right font-arabic resize-none" 
+                  />
+                )}
+                {activeDetailsTab === 'composition' && (
+                  <textarea 
+                    rows={4}
+                    dir="rtl"
+                    placeholder="تكوين المنتج باللغة العربية..." 
+                    value={productTranslations.ar.composition}
+                    onChange={(e) => setProductTranslations({ ...productTranslations, ar: { ...productTranslations.ar, composition: e.target.value } })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm text-right font-arabic resize-none" 
+                  />
+                )}
+                {activeDetailsTab === 'care' && (
+                  <textarea 
+                    rows={4}
+                    dir="rtl"
+                    placeholder="تعليمات العناية باللغة العربية..." 
+                    value={productTranslations.ar.care}
+                    onChange={(e) => setProductTranslations({ ...productTranslations, ar: { ...productTranslations.ar, care: e.target.value } })}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm text-right font-arabic resize-none" 
+                  />
+                )}
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -263,6 +491,31 @@ export default function AdminProducts() {
               <span className="text-xs text-gray-500">{images.length}/5 uploaded</span>
             </div>
             
+            {images.length < 5 && (
+              <div className="flex gap-2 mb-4">
+                <input 
+                  type="text" 
+                  value={newImageUrl} 
+                  onChange={(e) => setNewImageUrl(e.target.value)} 
+                  placeholder="Or paste an image URL here..."
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddImageUrl();
+                    }
+                  }}
+                />
+                <button 
+                  type="button" 
+                  onClick={handleAddImageUrl}
+                  className="px-4 py-2 bg-gray-100 text-black border border-gray-200 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                >
+                  Add URL
+                </button>
+              </div>
+            )}
+            
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
               {images.map((img, index) => (
                 <div key={index} className="aspect-square bg-gray-100 rounded-md relative group border border-gray-200 overflow-hidden">
@@ -296,12 +549,9 @@ export default function AdminProducts() {
           <div className="pt-4 border-t border-gray-100 flex justify-end">
             <button 
               className="bg-black text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
-              onClick={() => {
-                alert('Mock: Product Added.');
-                setIsAdding(false);
-              }}
+              onClick={handleSaveProduct}
             >
-              Save Product
+              {editingId ? 'Update Product' : 'Save Product'}
             </button>
           </div>
         </div>
@@ -339,10 +589,16 @@ export default function AdminProducts() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-gray-400 hover:text-black transition-colors p-1">
+                    <button 
+                      onClick={() => handleEdit(product)}
+                      className="text-gray-400 hover:text-black transition-colors p-1"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="text-gray-400 hover:text-red-500 transition-colors p-1 ml-2">
+                    <button 
+                      onClick={() => handleDelete(product.id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors p-1 ml-2"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>

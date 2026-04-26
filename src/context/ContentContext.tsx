@@ -1,21 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Product, FAQItem, CustomSection, OrderInfo } from '../types';
+import { products as initialProducts } from '../data/products';
+import i18n from '../i18n';
 
-export interface FAQItem {
-  category: string;
-  questions: { q: string; a: string }[];
-}
+// Static translations from JSON files as defaults
+import enTranslations from '../locales/en/translation.json';
+import arTranslations from '../locales/ar/translation.json';
 
-export interface CustomSection {
-  id: string;
-  type: 'banner' | 'text-image';
-  title: string;
-  subtitle: string;
-  image: string;
-  btnText: string;
-  align: 'left' | 'right' | 'center';
-}
-
-export interface SiteContent {
+export interface SiteLanguageContent {
   homeHero: {
     season: string;
     titlePart1: string;
@@ -37,7 +29,32 @@ export interface SiteContent {
   faqs: FAQItem[];
 }
 
-const defaultContent: SiteContent = {
+export interface SiteContent {
+  locales: {
+    en: SiteLanguageContent;
+    ar: SiteLanguageContent;
+  };
+  translations: {
+    en: any;
+    ar: any;
+  };
+  products: Product[];
+  orders: OrderInfo[];
+  paymentSettings: {
+    cashOnDeliveryEnabled: boolean;
+    walletTransferEnabled: boolean;
+    wallets: { id: string; name: string; number: string }[];
+    instapayEnabled: boolean;
+    instapayAccounts: { id: string; name: string; address: string }[];
+  };
+  shippingPlans: {
+    id: string;
+    name: string;
+    rate: number;
+  }[];
+}
+
+const defaultLanguageContent: SiteLanguageContent = {
   homeHero: {
     season: "Spring / Summer 2026",
     titlePart1: "Refining",
@@ -82,9 +99,42 @@ const defaultContent: SiteContent = {
   ]
 };
 
+const defaultContent: SiteContent = {
+  locales: {
+    en: { ...defaultLanguageContent },
+    ar: { ...defaultLanguageContent }, // In reality, we should provide translated defaults
+  },
+  translations: {
+    en: enTranslations,
+    ar: arTranslations
+  },
+  products: initialProducts,
+  orders: [
+    { id: '#ORD-001', customer: 'Sarah Miller', email: 'sarah@example.com', date: 'Oct 12, 2026', items: 3, total: 345.00, status: 'Delivered' },
+    { id: '#ORD-002', customer: 'Elena Ridge', email: 'elena@example.com', date: 'Oct 11, 2026', items: 1, total: 120.00, status: 'Processing' },
+    { id: '#ORD-003', customer: 'Jessica Thompson', email: 'jessica@example.com', date: 'Oct 10, 2026', items: 5, total: 890.00, status: 'Shipped' },
+    { id: '#ORD-004', customer: 'Michael Chen', email: 'michael@example.com', date: 'Oct 09, 2026', items: 2, total: 210.00, status: 'Pending' }
+  ],
+  paymentSettings: {
+    cashOnDeliveryEnabled: true,
+    walletTransferEnabled: false,
+    wallets: [],
+    instapayEnabled: false,
+    instapayAccounts: []
+  },
+  shippingPlans: [
+    { id: 'free', name: 'Free Shipping', rate: 0 },
+    { id: 'standard', name: 'Standard Shipping', rate: 15.00 },
+    { id: 'express', name: 'Express Shipping', rate: 30.00 }
+  ]
+};
+
 interface ContentContextType {
   content: SiteContent;
   updateContent: (newContent: SiteContent) => void;
+  currentLocale: SiteLanguageContent;
+  updateLocaleContent: (lang: 'en' | 'ar', newContent: SiteLanguageContent) => void;
+  updateTranslations: (lang: 'en' | 'ar', newTranslations: any) => void;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -93,10 +143,17 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   const [content, setContent] = useState<SiteContent>(defaultContent);
 
   useEffect(() => {
-    const saved = localStorage.getItem('raav_site_content');
+    const saved = localStorage.getItem('raav_site_content_v2');
     if (saved) {
       try {
-        setContent(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setContent(parsed);
+        
+        // Sync custom translations with i18next
+        if (parsed.translations) {
+            i18n.addResourceBundle('en', 'translation', parsed.translations.en, true, true);
+            i18n.addResourceBundle('ar', 'translation', parsed.translations.ar, true, true);
+        }
       } catch (e) {
         console.error("Failed to parse site content");
       }
@@ -105,11 +162,44 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
 
   const updateContent = (newContent: SiteContent) => {
     setContent(newContent);
-    localStorage.setItem('raav_site_content', JSON.stringify(newContent));
+    localStorage.setItem('raav_site_content_v2', JSON.stringify(newContent));
+    
+    // Update local i18next bundles
+    i18n.addResourceBundle('en', 'translation', newContent.translations.en, true, true);
+    i18n.addResourceBundle('ar', 'translation', newContent.translations.ar, true, true);
   };
 
+  const updateLocaleContent = (lang: 'en' | 'ar', newLocaleContent: SiteLanguageContent) => {
+    updateContent({
+      ...content,
+      locales: {
+        ...content.locales,
+        [lang]: newLocaleContent
+      }
+    });
+  };
+
+  const updateTranslations = (lang: 'en' | 'ar', newTranslations: any) => {
+    updateContent({
+      ...content,
+      translations: {
+        ...content.translations,
+        [lang]: newTranslations
+      }
+    });
+  };
+
+  const currentLang = i18n.language === 'ar' ? 'ar' : 'en';
+  const currentLocale = content.locales[currentLang] || content.locales.en;
+
   return (
-    <ContentContext.Provider value={{ content, updateContent }}>
+    <ContentContext.Provider value={{ 
+      content, 
+      updateContent, 
+      currentLocale, 
+      updateLocaleContent,
+      updateTranslations
+    }}>
       {children}
     </ContentContext.Provider>
   );

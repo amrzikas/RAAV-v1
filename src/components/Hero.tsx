@@ -5,12 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useContent } from '../context/ContentContext';
 
 export default function Hero() {
-  const { t, i18n } = useTranslation();
-  const { content } = useContent();
-
-  // If language is english, we prioritize the dynamic content from admin panel over the static JSON. 
-  // In a real app we'd save translations properly, but for this demo, dynamic content is mainly in English
-  const isEn = i18n.language === 'en';
+  const { t } = useTranslation();
+  const { currentLocale } = useContent();
 
   return (
     <section className="relative min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden bg-gray-50">
@@ -26,18 +22,18 @@ export default function Hero() {
             <div className="inline-flex items-center gap-4 mb-8">
               <span className="h-[1px] w-12 bg-black"></span>
               <span className="text-xs font-bold tracking-[0.2em] text-gray-900 uppercase">
-                {isEn ? content.homeHero.season : t('hero.season')}
+                {currentLocale.homeHero.season}
               </span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold mb-6 leading-[1.05] tracking-tight text-gray-900">
-              {isEn ? content.homeHero.titlePart1 : t('hero.title_part1')} <br /> 
-              <span className="italic font-light text-gray-500">{isEn ? content.homeHero.titlePart2 : t('hero.title_part2')}</span> <br /> 
-              {isEn ? content.homeHero.titlePart3 : t('hero.title_part3')}
+              {currentLocale.homeHero.titlePart1} <br /> 
+              <span className="italic font-light text-gray-500">{currentLocale.homeHero.titlePart2}</span> <br /> 
+              {currentLocale.homeHero.titlePart3}
             </h1>
             
             <p className="text-gray-600 text-base sm:text-lg md:text-xl mb-10 max-w-md leading-relaxed font-light whitespace-pre-wrap">
-              {isEn ? content.homeHero.subtitle : t('hero.subtitle')}
+              {currentLocale.homeHero.subtitle}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full">
@@ -59,7 +55,7 @@ export default function Hero() {
           >
             <div className="absolute inset-0 bg-gray-200 overflow-hidden shadow-2xl">
               <img 
-                src={content.homeHero.image} 
+                src={currentLocale.homeHero.image} 
                 alt="Contemporary Fashion" 
                 className="w-full h-full object-cover object-center"
               />
@@ -74,7 +70,7 @@ export default function Hero() {
             >
               <p className="text-xs font-bold tracking-widest uppercase mb-3 text-black">{t('hero.editors_pick')}</p>
               <p className="text-sm text-gray-600 font-serif italic leading-relaxed">
-                "{isEn ? content.homeHero.editorQuote : t('hero.editor_quote')}"
+                "{currentLocale.homeHero.editorQuote}"
               </p>
             </motion.div>
           </motion.div>
