@@ -63,10 +63,11 @@ export interface FAQItem {
 
 export interface CustomSection {
   id: string;
-  type: 'banner' | 'text-image';
+  type: 'banner' | 'text-image' | 'gallery';
   title: string;
   subtitle: string;
   image: string;
+  images?: string[];
   btnText: string;
   align: 'left' | 'right' | 'center';
 }

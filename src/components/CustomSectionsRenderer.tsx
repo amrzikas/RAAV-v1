@@ -105,6 +105,35 @@ export default function CustomSectionsRenderer() {
           );
         }
 
+        if (section.type === 'gallery') {
+          return (
+            <section key={section.id} className="py-24 bg-white overflow-hidden">
+               <div className="container mx-auto px-4 md:px-6 mb-12 text-center">
+                 <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">{section.title}</h2>
+                 <p className="text-gray-500 text-sm max-w-2xl mx-auto">{section.subtitle}</p>
+               </div>
+
+               <div className="flex w-full overflow-hidden">
+                 <motion.div 
+                   animate={{ x: [0, -1200] }}
+                   transition={{ 
+                     ease: "linear", 
+                     duration: 30, 
+                     repeat: Infinity 
+                   }}
+                   className="flex flex-nowrap"
+                 >
+                   {[...(section.images || []), ...(section.images || []), ...(section.images || [])].map((src, idx) => (
+                     <div key={idx} className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0 px-2">
+                       <img src={src} alt="" className="w-full h-full object-cover rounded-md" />
+                     </div>
+                   ))}
+                 </motion.div>
+               </div>
+            </section>
+          );
+        }
+
         return null;
       })}
     </>

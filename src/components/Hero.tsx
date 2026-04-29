@@ -54,11 +54,43 @@ export default function Hero() {
             className="w-full lg:w-1/2 relative h-[60vh] lg:h-[80vh] mt-8 lg:mt-0"
           >
             <div className="absolute inset-0 bg-gray-200 overflow-hidden shadow-2xl">
-              <img 
-                src={currentLocale.homeHero.image} 
-                alt="Contemporary Fashion" 
-                className="w-full h-full object-cover object-center"
-              />
+              {currentLocale.homeHero.videoUrl ? (
+                (() => {
+                  const url = currentLocale.homeHero.videoUrl;
+                  const isDirectVideo = url.startsWith('data:video') || url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.mov') || url.toLowerCase().includes('.webm');
+                  
+                  if (isDirectVideo) {
+                    return (
+                      <video 
+                        src={url} 
+                        autoPlay 
+                        muted 
+                        loop 
+                        playsInline 
+                        className="w-full h-full object-cover"
+                      />
+                    );
+                  }
+
+                  return (
+                    <iframe
+                      src={url.includes('renderforest.com') 
+                        ? url.replace('/watch-', '/watch-embed/')
+                        : url}
+                      title="Hero Video"
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  );
+                })()
+              ) : (
+                <img 
+                  src={currentLocale.homeHero.image} 
+                  alt="Contemporary Fashion" 
+                  className="w-full h-full object-cover object-center"
+                />
+              )}
             </div>
             
             {/* Floating editorial element */}

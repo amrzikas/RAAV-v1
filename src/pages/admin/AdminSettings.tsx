@@ -55,6 +55,73 @@ function ImageUploadInput({ value, onChange, label = "Image URL" }: { value: str
   );
 }
 
+function VideoUploadInput({ value, onChange, label = "Video URL" }: { value: string, onChange: (val: string) => void, label?: string }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file size (optional, but good practice for base64 storage)
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit for local storage safety
+      alert("Video file is too large. Please use a file smaller than 10MB or provide a URL.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        onChange(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">{label}</label>
+      <div className="flex gap-2">
+        <input 
+          type="text" 
+          value={value} 
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
+          placeholder="https://..."
+        />
+        <input 
+          type="file" 
+          accept="video/*" 
+          className="hidden" 
+          ref={fileInputRef}
+          onChange={handleFileChange}
+        />
+        <button 
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="px-4 py-2 bg-gray-100 text-gray-700 border border-gray-200 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm"
+        >
+          <UploadCloud className="w-4 h-4" /> Upload
+        </button>
+      </div>
+      {value && (value.startsWith('data:video') || value.includes('mp4') || value.includes('mov')) && (
+        <div className="mt-2 flex items-center gap-2">
+          <video src={value} className="h-20 w-32 border border-gray-200 rounded object-cover" muted />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-gray-500 uppercase">Video Preview</span>
+            <button 
+              type="button" 
+              onClick={() => onChange('')}
+              className="text-[10px] text-red-500 hover:underline text-left"
+            >
+              Remove video
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminSettings() {
 
   const [activeTab, setActiveTab] = useState('general');
@@ -246,6 +313,14 @@ export default function AdminSettings() {
                       onChange={(val) => updateLocaleContent(editingLang, { ...currentLocale, homeHero: { ...currentLocale.homeHero, image: val }})}
                     />
                   </div>
+                  <div>
+                    <VideoUploadInput 
+                      label="Hero Video URL or Upload"
+                      value={currentLocale.homeHero.videoUrl || ''} 
+                      onChange={(val) => updateLocaleContent(editingLang, { ...currentLocale, homeHero: { ...currentLocale.homeHero, videoUrl: val }})}
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1 italic">Providing a video will replace the hero image. Supports direct URLs, YouTube/Vimeo links, or local uploads.</p>
+                  </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Hero Subtitle</label>
                     <textarea 
@@ -254,6 +329,70 @@ export default function AdminSettings() {
                       onChange={(e) => updateLocaleContent(editingLang, { ...currentLocale, homeHero: { ...currentLocale.homeHero, subtitle: e.target.value }})}
                       className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm resize-none"
                     ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* Home Banners */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wider mb-4 border-t border-gray-100 pt-6">Instagram Feed</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Section Title</label>
+                    <input 
+                      type="text" 
+                      value={currentLocale.homeInstagram?.title || ''} 
+                      onChange={(e) => updateLocaleContent(editingLang, { ...currentLocale, homeInstagram: { ...(currentLocale.homeInstagram || { handle: '', images: [] }), title: e.target.value }})}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Instagram Handle</label>
+                    <input 
+                      type="text" 
+                      value={currentLocale.homeInstagram?.handle || ''} 
+                      onChange={(e) => updateLocaleContent(editingLang, { ...currentLocale, homeInstagram: { ...(currentLocale.homeInstagram || { title: '', images: [] }), handle: e.target.value }})}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:border-black transition-colors text-sm" 
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 uppercase tracking-wider mb-2">Images (6 URLs recommended)</label>
+                    <div className="space-y-2">
+                      {(currentLocale.homeInstagram?.images || []).map((img, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={img} 
+                            onChange={(e) => {
+                              const newImgs = [...(currentLocale.homeInstagram?.images || [])];
+                              newImgs[i] = e.target.value;
+                              updateLocaleContent(editingLang, { ...currentLocale, homeInstagram: { ...(currentLocale.homeInstagram || { title: '', handle: '' }), images: newImgs } });
+                            }}
+                            className="flex-1 px-3 py-1 border border-gray-200 rounded-md text-xs"
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              const newImgs = (currentLocale.homeInstagram?.images || []).filter((_, idx) => idx !== i);
+                               updateLocaleContent(editingLang, { ...currentLocale, homeInstagram: { ...(currentLocale.homeInstagram || { title: '', handle: '' }), images: newImgs } });
+                            }}
+                            className="text-red-500"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                      <button 
+                         type="button"
+                         onClick={() => {
+                           const currentImgs = currentLocale.homeInstagram?.images || [];
+                           updateLocaleContent(editingLang, { ...currentLocale, homeInstagram: { ...(currentLocale.homeInstagram || { title: '', handle: '' }), images: [...currentImgs, ''] } });
+                         }}
+                         className="text-xs text-blue-600 font-bold uppercase"
+                      >
+                        + Add Image
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -368,14 +507,52 @@ export default function AdminSettings() {
                             >
                               <option value="text-image">Split: Text & Image</option>
                               <option value="banner">Full Banner</option>
+                              <option value="gallery">Animated Gallery</option>
                             </select>
                           </div>
                           <div>
-                            <ImageUploadInput 
-                              label="Image URL"
-                              value={section.image}
-                              onChange={(val) => { const newSections = [...currentLocale.customSections]; newSections[idx] = { ...section, image: val }; updateLocaleContent(editingLang, { ...currentLocale, customSections: newSections }); }}
-                            />
+                            {section.type !== 'gallery' ? (
+                              <ImageUploadInput 
+                                label="Image URL"
+                                value={section.image}
+                                onChange={(val) => { const newSections = [...currentLocale.customSections]; newSections[idx] = { ...section, image: val }; updateLocaleContent(editingLang, { ...currentLocale, customSections: newSections }); }}
+                              />
+                            ) : (
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-2 uppercase tracking-wider">Gallery Images</label>
+                                <div className="space-y-2">
+                                  {(section.images || []).map((img, i) => (
+                                    <div key={i} className="flex gap-2">
+                                      <input 
+                                        type="text" 
+                                        value={img} 
+                                        onChange={(e) => {
+                                          const newImgs = [...(section.images || [])];
+                                          newImgs[i] = e.target.value;
+                                          const newSections = [...currentLocale.customSections];
+                                          newSections[idx] = { ...section, images: newImgs };
+                                          updateLocaleContent(editingLang, { ...currentLocale, customSections: newSections });
+                                        }}
+                                        className="flex-1 px-3 py-1 border border-gray-200 rounded-md text-xs"
+                                        placeholder="Image URL"
+                                      />
+                                      <button type="button" onClick={() => {
+                                        const newImgs = (section.images || []).filter((_, imgIdx) => imgIdx !== i);
+                                        const newSections = [...currentLocale.customSections];
+                                        newSections[idx] = { ...section, images: newImgs };
+                                        updateLocaleContent(editingLang, { ...currentLocale, customSections: newSections });
+                                      }} className="text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  ))}
+                                  <button type="button" onClick={() => {
+                                    const newImgs = [...(section.images || []), ''];
+                                    const newSections = [...currentLocale.customSections];
+                                    newSections[idx] = { ...section, images: newImgs };
+                                    updateLocaleContent(editingLang, { ...currentLocale, customSections: newSections });
+                                  }} className="text-[10px] font-bold text-blue-600 uppercase">+ Add Gallery Image</button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Title</label>

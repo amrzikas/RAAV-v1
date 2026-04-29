@@ -16,6 +16,12 @@ export interface SiteLanguageContent {
     subtitle: string;
     editorQuote: string;
     image: string;
+    videoUrl?: string;
+  };
+  homeInstagram: {
+    title: string;
+    handle: string;
+    images: string[];
   };
   homeBanners: {
     main: { subtitle: string; title: string; btn: string; image: string };
@@ -62,7 +68,20 @@ const defaultLanguageContent: SiteLanguageContent = {
     titlePart3: "Elegance.",
     subtitle: "Discover the modern aesthetic with our newly curated collection. Designed for the bold, the beautiful, and the minimalist.",
     editorQuote: "The perfect balance of form and function for the modern wardrobe.",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&auto=format&fit=crop&q=80"
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&auto=format&fit=crop&q=80",
+    videoUrl: ""
+  },
+  homeInstagram: {
+    title: "Follow Us on Instagram",
+    handle: "@RAAV_official",
+    images: [
+      "https://images.unsplash.com/photo-1549439602-43ebca2327af?w=400&h=400&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=400&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1550614000-4b95d4662d51?w=400&h=400&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1509631179647-0c5000508c5e?w=400&h=400&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=400&h=400&auto=format&fit=crop&q=80",
+    ]
   },
   homeBanners: {
     main: { subtitle: "Archive", title: "Classic Winter", btn: "Explore Collection", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&auto=format&fit=crop&q=80" },
@@ -147,12 +166,25 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setContent(parsed);
+        
+        // Deep merge logic to ensure new sections like homeInstagram exist
+        const mergedContent = {
+          ...defaultContent,
+          ...parsed,
+          locales: {
+            en: { ...defaultContent.locales.en, ...(parsed.locales?.en || {}) },
+            ar: { ...defaultContent.locales.ar, ...(parsed.locales?.ar || {}) }
+          },
+          paymentSettings: { ...defaultContent.paymentSettings, ...(parsed.paymentSettings || {}) },
+          translations: { ...defaultContent.translations, ...(parsed.translations || {}) }
+        };
+        
+        setContent(mergedContent);
         
         // Sync custom translations with i18next
-        if (parsed.translations) {
-            i18n.addResourceBundle('en', 'translation', parsed.translations.en, true, true);
-            i18n.addResourceBundle('ar', 'translation', parsed.translations.ar, true, true);
+        if (mergedContent.translations) {
+            i18n.addResourceBundle('en', 'translation', mergedContent.translations.en, true, true);
+            i18n.addResourceBundle('ar', 'translation', mergedContent.translations.ar, true, true);
         }
       } catch (e) {
         console.error("Failed to parse site content");
