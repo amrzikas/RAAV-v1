@@ -15,7 +15,7 @@ export default function Contact() {
     subject: '',
     message: ''
   });
-}
+
 const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 };
@@ -109,12 +109,10 @@ return (
                 </button>
               </form>
             </div>
-
           </div>
         </div>
       </div>
     </div>
   </div>
-
 );
-
+};
