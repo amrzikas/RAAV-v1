@@ -66,9 +66,8 @@ export default function Footer() {
             )}
           </p>
           <div className="flex space-x-4 rtl:space-x-reverse">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 opacity-60 grayscale hover:grayscale-0 transition-all" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="MasterCard" className="h-6 opacity-60 grayscale hover:grayscale-0 transition-all" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6 opacity-60 grayscale hover:grayscale-0 transition-all" />
+            <p>Degined by AMR ZAKARIA</p>
+            
           </div>
         </div>
       </div>
