@@ -52,7 +52,7 @@ export default function Footer() {
             </p>
             <p className="text-gray-500 mb-4">
               {t('footer.support')}<br />
-              <a href="tel:+55111222333" className="text-black font-medium hover:underline" dir="ltr">+55 111 222 333 44</a>
+              <a href="tel:+201050740202" className="text-black font-medium hover:underline" dir="ltr">+201050740202</a>
             </p>
           </div>
 
