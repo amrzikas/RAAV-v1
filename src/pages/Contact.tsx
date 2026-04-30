@@ -52,8 +52,9 @@ export default function Contact() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-1 uppercase tracking-widest text-sm">{t('checkout.address', 'Address')}</h4>
                   <p className="text-gray-500 font-light leading-relaxed">
-                    }Cairo<br />
-                    Egypt<br />
+                    October<br />
+                    Giza<br />
+                    Egypt
                   </p>
                 </div>
               </div>
