@@ -78,10 +78,6 @@ export default function Contact() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <Clock className={`w-6 h-6 text-gray-400 mt-1 flex-shrink-0 ${currentLang === 'ar' ? 'ml-4' : ''}`} />
-                
-              </div>
             </div>
           </div>
 
