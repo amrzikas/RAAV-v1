@@ -67,6 +67,7 @@ export default function Footer() {
           </p>
           <div className="flex space-x-4 rtl:space-x-reverse">
             <p>Degined by AMR ZAKARIA</p>
+            <p>01050740202</p>
             
           </div>
         </div>
