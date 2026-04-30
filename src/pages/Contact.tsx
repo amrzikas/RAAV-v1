@@ -75,13 +75,9 @@ export default function Contact() {
                   <a href="mailto:hello@raav.com" className="text-black hover:text-gray-500 font-medium transition-colors">
                     hello@raav.com
                   </a>
-                </div>
               </div>
-
             </div>
-          </div>
-
-          {/* Contact Form */}
+                {/* Contact Form */}
           <div className="w-full lg:w-2/3 bg-gray-50 p-8 md:p-12">
             <h3 className={`text-2xl font-serif font-bold mb-8 ${currentLang === 'ar' ? 'text-right' : 'text-left'}`}>{t('contact_form.title', 'Send a Message')}</h3>
             
