@@ -52,9 +52,8 @@ export default function Contact() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-1 uppercase tracking-widest text-sm">{t('checkout.address', 'Address')}</h4>
                   <p className="text-gray-500 font-light leading-relaxed">
-                    123 Fashion Avenue<br />
-                    Creative District, NY 10001<br />
-                    United States
+                    }Cairo<br />
+                    Egypt<br />
                   </p>
                 </div>
               </div>
@@ -64,7 +63,7 @@ export default function Contact() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-1 uppercase tracking-widest text-sm">{t('checkout.phone', 'Phone')}</h4>
                   <p className="text-gray-500 font-light leading-relaxed text-lg font-serif">
-                    +1 (555) 123-4567
+                    +201050740202
                   </p>
                 </div>
               </div>
@@ -81,14 +80,7 @@ export default function Contact() {
 
               <div className="flex items-start gap-4">
                 <Clock className={`w-6 h-6 text-gray-400 mt-1 flex-shrink-0 ${currentLang === 'ar' ? 'ml-4' : ''}`} />
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-1 uppercase tracking-widest text-sm">{currentLang === 'ar' ? 'ساعات العمل' : 'Opening Hours'}</h4>
-                  <p className="text-gray-500 font-light leading-relaxed">
-                    Monday - Friday: 9am - 8pm<br />
-                    Saturday: 10am - 6pm<br />
-                    Sunday: Closed
-                  </p>
-                </div>
+                
               </div>
             </div>
           </div>
